@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sydney Rent Affordability Tool</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-home"></i> Sydney Rent Affordability Tool</h1>
+            <p class="subtitle">Find rental areas in Sydney based on your household income</p>
+        </header>
+
+        <main>
+            <div class="app-grid">
+                <!-- LEFT PANEL: Calculator -->
+                <section class="calculator-panel">
+                    <h2><i class="fas fa-calculator"></i> Affordability Calculator</h2>
+                    
+                    <div class="input-card">
+                        <div class="input-group">
+                            <label for="income">
+                                <i class="fas fa-money-bill-wave"></i> Annual Household Income
+                            </label>
+                            <div class="input-with-symbol">
+                                <span class="symbol">$</span>
+                                <input type="number" id="income" placeholder="e.g., 85,000" min="0" step="1000">
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="income-slider" min="30000" max="200000" step="5000" value="85000">
+                                <div class="slider-labels">
+                                    <span>$30k</span>
+                                    <span>$115k</span>
+                                    <span>$200k</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="bedrooms">
+                                <i class="fas fa-bed"></i> Bedrooms Needed
+                            </label>
+                            <div class="bedroom-options">
+                                <button class="bed-btn active" data-beds="1">1</button>
+                                <button class="bed-btn" data-beds="2">2</button>
+                                <button class="bed-btn" data-beds="3">3</button>
+                                <button class="bed-btn" data-beds="4">4+</button>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="max-commute">
+                                <i class="fas fa-train"></i> Max Commute to CBD (minutes)
+                            </label>
+                            <select id="max-commute">
+                                <option value="30">30 min</option>
+                                <option value="45" selected>45 min</option>
+                                <option value="60">60 min</option>
+                                <option value="90">90 min</option>
+                                <option value="999">Any</option>
+                            </select>
+                        </div>
+
+                        <div class="affordability-summary">
+                            <h3><i class="fas fa-chart-pie"></i> Budget Breakdown</h3>
+                            <div class="budget-item">
+                                <span>Maximum Weekly Rent:</span>
+                                <span class="budget-value" id="max-rent">$490</span>
+                            </div>
+                            <div class="budget-item">
+                                <span>Monthly Housing Budget:</span>
+                                <span class="budget-value" id="monthly-budget">$2,125</span>
+                            </div>
+                            <div class="budget-item">
+                                <span>30% of Income Rule:</span>
+                                <span class="budget-value" id="income-percent">30%</span>
+                            </div>
+                        </div>
+
+                        <button id="calculate-btn" class="calculate-btn">
+                            <i class="fas fa-search"></i> Find Affordable Areas
+                        </button>
+                    </div>
+                </section>
+
+                <!-- RIGHT PANEL: Results & Map -->
+                <section class="results-panel">
+                    <div class="map-container">
+                        <h2><i class="fas fa-map-marked-alt"></i> Sydney Rental Map</h2>
+                        <div id="map"></div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #2ecc71;"></span>
+                                <span>Highly Affordable</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #f39c12;"></span>
+                                <span>Moderate</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background-color: #e74c3c;"></span>
+                                <span>Less Affordable</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-container">
+                        <h2><i class="fas fa-list"></i> Recommended Areas</h2>
+                        <div class="results-header">
+                            <div class="results-count">
+                                <span id="results-count">0</span> areas match your criteria
+                            </div>
+                            <div class="sort-options">
+                                <select id="sort-by">
+                                    <option value="rent">Sort by: Rent (Low to High)</option>
+                                    <option value="commute">Sort by: Commute Time</option>
+                                    <option value="affordability">Sort by: Affordability</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="results-list" class="results-list">
+                            <!-- Results will appear here -->
+                            <div class="no-results">
+                                <i class="fas fa-search fa-3x"></i>
+                                <h3>Enter your details to find affordable areas</h3>
+                                <p>Adjust the income slider and select your preferences</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>Data sourced from NSW Government Open Data | Last updated: December 2024</p>
+            <p class="disclaimer">Note: This tool provides estimates only. Actual rents may vary.</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
