@@ -4,147 +4,461 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sydney Rent Affordability Tool</title>
-    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Leaflet CSS for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        /* RESET & BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* MAIN LAYOUT */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* CALCULATOR CARD */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8rem;
+        }
+        
+        /* INPUT SECTIONS */
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-section h3 {
+            color: #444;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-section h3 i {
+            color: #667eea;
+        }
+        
+        /* INCOME SLIDER */
+        .slider-container {
+            margin: 20px 0;
+        }
+        
+        .income-display {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #4CAF50, #FFC107, #F44336);
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* BEDROOM BUTTONS */
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 15px;
+            text-align: center;
+            background: #f1f3f4;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #e8eaed;
+            transform: translateY(-2px);
+        }
+        
+        .btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* BUDGET DISPLAY */
+        .budget-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            border-left: 5px solid #667eea;
+            margin-top: 30px;
+        }
+        
+        .budget-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .budget-item:last-child {
+            border-bottom: none;
+        }
+        
+        .budget-label {
+            color: #555;
+            font-size: 1rem;
+        }
+        
+        .budget-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        /* CALCULATE BUTTON */
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .calculate-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        /* MAP SECTION */
+        #map-container {
+            height: 500px;
+            width: 100%;
+            border-radius: 12px;
+            border: 3px solid #e0e0e0;
+            margin-top: 10px;
+        }
+        
+        /* LEGEND */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        /* RECOMMENDATIONS */
+        .recommendations {
+            margin-top: 30px;
+        }
+        
+        .recommendations h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        #recommendations-list {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .recommendation-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        /* FOOTER */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        /* ICONS */
+        .icon {
+            display: inline-block;
+            width: 24px;
+            text-align: center;
+        }
+    </style>
+    
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- HEADER -->
+    <header>
+        <h1><i class="fas fa-home"></i> Sydney Rent Affordability Tool</h1>
+        <p class="subtitle">Find rental areas in Sydney based on your household income and preferences</p>
+    </header>
+    
+    <!-- MAIN CONTENT -->
     <div class="container">
-        <header>
-            <h1><i class="fas fa-home"></i> Sydney Rent Affordability Tool</h1>
-            <p class="subtitle">Find rental areas in Sydney based on your household income</p>
-        </header>
-
-        <main>
-            <div class="app-grid">
-                <!-- LEFT PANEL: Calculator -->
-                <section class="calculator-panel">
-                    <h2><i class="fas fa-calculator"></i> Affordability Calculator</h2>
-                    
-                    <div class="input-card">
-                        <div class="input-group">
-                            <label for="income">
-                                <i class="fas fa-money-bill-wave"></i> Annual Household Income
-                            </label>
-                            <div class="input-with-symbol">
-                                <span class="symbol">$</span>
-                                <input type="number" id="income" placeholder="e.g., 85,000" min="0" step="1000">
-                            </div>
-                            <div class="slider-container">
-                                <input type="range" id="income-slider" min="30000" max="200000" step="5000" value="85000">
-                                <div class="slider-labels">
-                                    <span>$30k</span>
-                                    <span>$115k</span>
-                                    <span>$200k</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="bedrooms">
-                                <i class="fas fa-bed"></i> Bedrooms Needed
-                            </label>
-                            <div class="bedroom-options">
-                                <button class="bed-btn active" data-beds="1">1</button>
-                                <button class="bed-btn" data-beds="2">2</button>
-                                <button class="bed-btn" data-beds="3">3</button>
-                                <button class="bed-btn" data-beds="4">4+</button>
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="max-commute">
-                                <i class="fas fa-train"></i> Max Commute to CBD (minutes)
-                            </label>
-                            <select id="max-commute">
-                                <option value="30">30 min</option>
-                                <option value="45" selected>45 min</option>
-                                <option value="60">60 min</option>
-                                <option value="90">90 min</option>
-                                <option value="999">Any</option>
-                            </select>
-                        </div>
-
-                        <div class="affordability-summary">
-                            <h3><i class="fas fa-chart-pie"></i> Budget Breakdown</h3>
-                            <div class="budget-item">
-                                <span>Maximum Weekly Rent:</span>
-                                <span class="budget-value" id="max-rent">$490</span>
-                            </div>
-                            <div class="budget-item">
-                                <span>Monthly Housing Budget:</span>
-                                <span class="budget-value" id="monthly-budget">$2,125</span>
-                            </div>
-                            <div class="budget-item">
-                                <span>30% of Income Rule:</span>
-                                <span class="budget-value" id="income-percent">30%</span>
-                            </div>
-                        </div>
-
-                        <button id="calculate-btn" class="calculate-btn">
-                            <i class="fas fa-search"></i> Find Affordable Areas
-                        </button>
+        <!-- LEFT COLUMN: CALCULATOR -->
+        <div class="card">
+            <h2><i class="fas fa-calculator"></i> Affordability Calculator</h2>
+            
+            <!-- INCOME SECTION -->
+            <div class="input-section">
+                <h3><i class="fas fa-money-bill-wave"></i> Annual Household Income</h3>
+                <div class="income-display" id="income-display">$85,000</div>
+                <div class="slider-container">
+                    <input type="range" min="30000" max="200000" value="85000" class="slider" id="income-slider">
+                    <div class="slider-labels">
+                        <span>$30k</span>
+                        <span>$115k</span>
+                        <span>$200k</span>
                     </div>
-                </section>
-
-                <!-- RIGHT PANEL: Results & Map -->
-                <section class="results-panel">
-                    <div class="map-container">
-                        <h2><i class="fas fa-map-marked-alt"></i> Sydney Rental Map</h2>
-                        <div id="map"></div>
-                        <div class="map-legend">
-                            <div class="legend-item">
-                                <span class="legend-color" style="background-color: #2ecc71;"></span>
-                                <span>Highly Affordable</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background-color: #f39c12;"></span>
-                                <span>Moderate</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background-color: #e74c3c;"></span>
-                                <span>Less Affordable</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="results-container">
-                        <h2><i class="fas fa-list"></i> Recommended Areas</h2>
-                        <div class="results-header">
-                            <div class="results-count">
-                                <span id="results-count">0</span> areas match your criteria
-                            </div>
-                            <div class="sort-options">
-                                <select id="sort-by">
-                                    <option value="rent">Sort by: Rent (Low to High)</option>
-                                    <option value="commute">Sort by: Commute Time</option>
-                                    <option value="affordability">Sort by: Affordability</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div id="results-list" class="results-list">
-                            <!-- Results will appear here -->
-                            <div class="no-results">
-                                <i class="fas fa-search fa-3x"></i>
-                                <h3>Enter your details to find affordable areas</h3>
-                                <p>Adjust the income slider and select your preferences</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                </div>
             </div>
-        </main>
-
-        <footer>
-            <p>Data sourced from NSW Government Open Data | Last updated: December 2024</p>
-            <p class="disclaimer">Note: This tool provides estimates only. Actual rents may vary.</p>
-        </footer>
+            
+            <!-- BEDROOMS SECTION -->
+            <div class="input-section">
+                <h3><i class="fas fa-bed"></i> Bedrooms Needed</h3>
+                <div class="button-group">
+                    <div class="btn bed-btn active" data-beds="1">1 Bed</div>
+                    <div class="btn bed-btn" data-beds="2">2 Beds</div>
+                    <div class="btn bed-btn" data-beds="3">3 Beds</div>
+                    <div class="btn bed-btn" data-beds="4">4+ Beds</div>
+                </div>
+            </div>
+            
+            <!-- COMMUTE SECTION -->
+            <div class="input-section">
+                <h3><i class="fas fa-car"></i> Max Commute to CBD (minutes)</h3>
+                <div class="income-display" id="commute-display">45 min</div>
+                <div class="slider-container">
+                    <input type="range" min="10" max="120" value="45" class="slider" id="commute-slider">
+                    <div class="slider-labels">
+                        <span>10 min</span>
+                        <span>65 min</span>
+                        <span>120 min</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- BUDGET BREAKDOWN -->
+            <div class="card budget-card">
+                <h3><i class="fas fa-chart-pie"></i> Budget Breakdown</h3>
+                <div class="budget-item">
+                    <span class="budget-label">Maximum Weekly Rent:</span>
+                    <span class="budget-value" id="weekly-rent">$490</span>
+                </div>
+                <div class="budget-item">
+                    <span class="budget-label">Monthly Housing Budget:</span>
+                    <span class="budget-value" id="monthly-budget">$2,125</span>
+                </div>
+                <div class="budget-item">
+                    <span class="budget-label">Annual Rent Budget:</span>
+                    <span class="budget-value" id="annual-budget">$25,480</span>
+                </div>
+            </div>
+            
+            <!-- CALCULATE BUTTON -->
+            <button class="calculate-btn" id="calculate-btn">
+                <i class="fas fa-search"></i> Find Affordable Areas
+            </button>
+        </div>
+        
+        <!-- RIGHT COLUMN: MAP -->
+        <div class="card">
+            <h2><i class="fas fa-map-marked-alt"></i> Sydney Rental Map</h2>
+            
+            <!-- LEGEND -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #4CAF50;"></div>
+                    <span>Highly Affordable</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FFC107;"></div>
+                    <span>Moderate</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #F44336;"></div>
+                    <span>Less Affordable</span>
+                </div>
+            </div>
+            
+            <!-- MAP CONTAINER -->
+            <div id="map-container"></div>
+            
+            <!-- RECOMMENDATIONS -->
+            <div class="recommendations">
+                <h3><i class="fas fa-star"></i> Recommended Areas</h3>
+                <div id="recommendations-list">
+                    <p style="color: #666; text-align: center;">
+                        <i class="fas fa-mouse-pointer"></i><br>
+                        Adjust your preferences and click "Find Affordable Areas" to see recommendations
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- JavaScript Files -->
+    
+    <!-- FOOTER -->
+    <footer>
+        <p>Sydney Rent Affordability Tool • Data sourced from Power Query analysis • Updated 2024</p>
+        <p>Click on map markers for detailed suburb information</p>
+    </footer>
+    
+    <!-- ========== JAVASCRIPT FILES ========== -->
+    <!-- Load Leaflet Map Library -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Load Your Data -->
     <script src="js/data.js"></script>
-    <script src="js/main.js"></script>
+    
+    <!-- Load Map Logic -->
+    <script src="js/map.js"></script>
+    
+    <!-- Load Calculator Logic -->
+    <script src="js/calculator.js"></script>
+    
+    <!-- Initialize on load -->
+    <script>
+        console.log('Page loaded successfully');
+        
+        // Quick check for required elements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded');
+            
+            // Check for map container
+            const mapContainer = document.getElementById('map-container');
+            if (!mapContainer) {
+                console.error('ERROR: map-container element not found!');
+            } else {
+                console.log('Map container found:', mapContainer);
+            }
+            
+            // Check for data
+            if (typeof sydneySuburbs === 'undefined') {
+                console.error('ERROR: sydneySuburbs data not loaded!');
+            } else {
+                console.log('Suburb data loaded:', sydneySuburbs.length, 'suburbs');
+            }
+        });
+    </script>
 </body>
 </html>
